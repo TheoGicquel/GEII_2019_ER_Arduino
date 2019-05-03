@@ -1,0 +1,74 @@
+#include <interruptions.h>
+/* 2.3 Commande asservie
+ *  /!\ Programme incomplet car tops non configurés
+ */
+
+
+//outputs
+
+
+  //roue droite
+#define mav_d 3
+#define mar_d 5
+
+//interrupts
+
+#define int_d 9
+
+int d=0;
+
+/* ---- mov ---- */
+
+
+void rot_d(){
+
+  analogWrite(mav_d,200); 
+}
+
+
+
+
+void rot_90(){
+  while(d<45){
+  rot_d();
+      }
+ 
+ 
+
+   analogWrite(mav_d,0);
+  analogWrite(mar_d,0);
+   }
+
+
+
+
+/* ---- counters ---- */
+
+
+void counter_d(){
+  d++;
+
+}
+
+void raz(){
+  d=0;
+}
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(mav_d,OUTPUT);
+  pinMode(mar_d,OUTPUT);
+
+  PCattachInterrupt(A1,counter_d,CHANGE);
+}
+/*
+
+*/
+
+void loop() {
+  raz();
+  rot_90();
+  delay(1000);
+
+}
+
