@@ -119,6 +119,13 @@ void ar(){
 }
 
 
+void raz_vit(){
+  mg_vit=200;
+  md_vit=200;
+}
+
+
+
 void stop_mv(){
   analogWrite(mg_av,0);
   analogWrite(mg_ar,0);  
@@ -169,7 +176,7 @@ void loop() {
   stop_mv();
   delay(2000);
   raz_dist();
-  
+  raz_vit();
   //------------------------------
 
   while(dist_g<25 && dist_d<25){
@@ -180,6 +187,7 @@ void loop() {
   stop_mv();
   delay(2000);
   raz_dist();
+  raz_vit();
 
   //------------------------------
 
@@ -191,6 +199,7 @@ void loop() {
   stop_mv();
   delay(2000);
   raz_dist();
+  raz_vit();
 
 
 }
