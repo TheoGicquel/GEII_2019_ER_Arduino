@@ -155,16 +155,17 @@ void loop() {
   }
   
   stop_mv();
-  raz_dist();
   delay(2000);
+  raz_dist();
 
-// demi tour
+
+// demi tour, 180°
   while(dist_g<100 && dist_d<100){
     rot_d();
 
   }
-  
-  raz_dist();
   stop_mv();
   delay(2000);
+  raz_dist();
+  
 }
