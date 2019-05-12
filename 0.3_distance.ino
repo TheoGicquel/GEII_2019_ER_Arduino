@@ -8,8 +8,8 @@
 #include <interruptions.h>
 
 //----------------------------------------------| Définition E/S |
-#define interrupt_pin_g A0
-#define interrupt_pin_d A1
+#define interrupt_g A0
+#define interrupt_d A1
 
 //outputs
   //roue gauche
@@ -21,9 +21,10 @@
 #define md_ar 5
 
 //interrupts
+/**
 #define interrupt_g 8
 #define interrupt_d 9
-
+**/
 //----------------------------------------------| Variables & Constantes |
 int acc_g=0;
 int acc_d=0;
@@ -91,12 +92,14 @@ delay(1);
 void rot_g(){
   analogWrite(mg_ar,mg_vit);
   analogWrite(md_av,md_vit); 
+  sync();
 }
 
 
 void rot_d(){
   analogWrite(mg_av,mg_vit);
   analogWrite(md_ar,md_vit); 
+  sync();
 }
 
 void av(){
@@ -119,7 +122,12 @@ void stop_mv(){
   analogWrite(md_av,0);
   analogWrite(md_ar,0);
 }
-
+//----------------------------------------------| Serie |
+void dist_debug(){
+  Serial.println(dist_g);
+  Serial.print("  ");
+  Serial.print(dist_d);
+}
 //----------------------------------------------| Initialisation |
 void setup(){
   pinMode(mg_av,OUTPUT);
@@ -127,10 +135,10 @@ void setup(){
   pinMode(md_av,OUTPUT);
   pinMode(md_ar,OUTPUT);
 
-  PCattachInterrupt(A0,codeur_g,CHANGE);
-  PCattachInterrupt(A1,codeur_d,CHANGE);
+  PCattachInterrupt(interrupt_g,codeur_g,CHANGE);
+  PCattachInterrupt(interrupt_d,codeur_d,CHANGE);
 
-
+  Serial.begin(9600);
 
   
 }
@@ -140,16 +148,22 @@ void loop() {
 
   // 60tops pour un tour complet / 10.5cm
   // 571 pour faire 1m
+  
   while(dist_g<571 && dist_d<571){
-  av();
+    av();
+
   }
+  
   stop_mv();
   raz_dist();
   delay(2000);
 
-    while(dist_g<571 && dist_d<571){
-  ar();
+// demi tour
+  while(dist_g<100 && dist_d<100){
+    rot_d();
+
   }
+  
   raz_dist();
   stop_mv();
   delay(2000);
