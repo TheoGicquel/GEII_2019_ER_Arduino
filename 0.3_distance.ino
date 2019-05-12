@@ -6,7 +6,6 @@
 
 //----------------------------------------------| Bibliothèques |
 #include <interruptions.h>
-
 //----------------------------------------------| Définition E/S |
 #define interrupt_g A0
 #define interrupt_d A1
@@ -35,42 +34,45 @@ int dist_d=0;
 int desync;
 int mg_vit=200;
 int md_vit=200;
-const int ajust=12;
+const int ajust=10;
 
 //----------------------------------------------| Fonctions - Encodeur |
 
 
-void codeur_g(){
+void codeur_g(){ // incrementation codeur gauche
   acc_g++;
   dist_g++;
 }
 
-void codeur_d(){
+void codeur_d(){ // incrementation codeur droite
   acc_d++;
-  dist_g++;
+  dist_d++;
 }
 
-void raz_dist(){
+void raz_dist(){ // reset de la distance parcourue
   dist_g=0;
   dist_d=0;
 }
 
 
-void sync(){
+void sync(){ // correctif de trajectoire
   desync=acc_g-acc_d;
 
   
-  if(desync!=0){ //-------- decalage present  v
+  if(desync!=0){ //-------- verif decalage present
     acc_g=0;
     acc_d=0;
+    
     if(desync<0){ //-------------- roue gauche en avance ---------------
 
       if(mg_vit>=255){ //------------------- ralentissement roue gauche
         mg_vit=mg_vit-ajust;
       }
+      
       else if(md_vit<=255){ //--------------- accelerer roue droite
         md_vit=md_vit+ajust;
-      }
+       }
+       
     }
 
     if(desync>0){ //-------------- roue droite en avance ---------------
@@ -90,29 +92,30 @@ delay(1);
 
 //----------------------------------------------| Fonctions - Mouvement |
 void rot_g(){
+  sync();
   analogWrite(mg_ar,mg_vit);
   analogWrite(md_av,md_vit); 
-  sync();
 }
 
 
 void rot_d(){
+  sync();
   analogWrite(mg_av,mg_vit);
   analogWrite(md_ar,md_vit); 
-  sync();
+  
 }
 
 void av(){
+  sync();
   analogWrite(mg_av,mg_vit);
   analogWrite(md_av,md_vit);
-  sync();
 }
 
 
 void ar(){
+  sync();
   analogWrite(mg_ar,mg_vit);
-  analogWrite(md_ar,md_vit);
-  sync();  
+  analogWrite(md_ar,md_vit);  
 }
 
 
@@ -124,8 +127,9 @@ void stop_mv(){
 }
 //----------------------------------------------| Serie |
 void dist_debug(){
-  Serial.println(dist_g);
-  Serial.print("  ");
+  Serial.print("\ng: ");
+  Serial.print(dist_g);
+  Serial.print("  d:");
   Serial.print(dist_d);
 }
 //----------------------------------------------| Initialisation |
@@ -137,20 +141,17 @@ void setup(){
 
   PCattachInterrupt(interrupt_g,codeur_g,CHANGE);
   PCattachInterrupt(interrupt_d,codeur_d,CHANGE);
-
-  Serial.begin(9600);
-
   
 }
 
 //==============================================| Loop |==============================================//
 void loop() {
-
-  // 60tops pour un tour complet / 10.5cm
-  // 571 pour faire 1m
+  // 30 tops pour un tour complet / 12cm
+  // 8*30 = 240 tops pour faire ~100cm
   
-  while(dist_g<571 && dist_d<571){
+  while(dist_g<240 && dist_d<240){
     av();
+    dist_debug();
 
   }
   
@@ -158,14 +159,19 @@ void loop() {
   delay(2000);
   raz_dist();
 
+/**
+25 pour 90°
+50 pour 180°
+**/
 
-// demi tour, 180°
-  while(dist_g<100 && dist_d<100){
+// demi-tour
+  while(dist_g<50 && dist_d<50){
     rot_d();
+    dist_debug();
 
   }
   stop_mv();
   delay(2000);
   raz_dist();
-  
+
 }
